@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MECHANIC
+  RECEPTIONIST
+}
+
+enum OSStatus {
+  WAITING
+  ANALYZING
+  BUDGET_SENT
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum ItemType {
+  PART
+  SERVICE
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password_hash String
+  role          Role           @default(MECHANIC)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  service_orders ServiceOrder[]
+}
+
+model Customer {
+  id         String     @id @default(uuid())
+  name       String
+  phone      String
+  email      String?
+  document   String     @unique
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  vehicles   Vehicle[]
+}
+
+model Vehicle {
+  id          String         @id @default(uuid())
+  customer_id String
+  customer    Customer       @relation(fields: [customer_id], references: [id])
+  plate       String         @unique
+  brand       String
+  model       String
+  year        Int
+  color       String
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  service_orders ServiceOrder[]
+}
+
+model ServiceOrder {
+  id                   String             @id @default(uuid())
+  vehicle_id           String
+  vehicle              Vehicle            @relation(fields: [vehicle_id], references: [id])
+  mechanic_id          String?
+  mechanic             User?              @relation(fields: [mechanic_id], references: [id])
+  status               OSStatus           @default(WAITING)
+  description          String
+  entry_date           DateTime           @default(now())
+  estimated_completion DateTime?
+  total_amount         Decimal            @default(0.0)
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @updatedAt
+  items                ServiceOrderItem[]
+}
+
+model ServiceOrderItem {
+  id               String       @id @default(uuid())
+  service_order_id String
+  service_order    ServiceOrder @relation(fields: [service_order_id], references: [id])
+  type             ItemType
+  description      String
+  quantity         Int
+  unit_price       Decimal
+  total_price      Decimal
+}
