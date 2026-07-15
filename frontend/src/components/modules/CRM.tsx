@@ -1,4 +1,5 @@
-import { Users, AlertCircle, Star, MessageCircle } from 'lucide-react';
+import { useRef } from 'react';
+import { Users, AlertCircle, Star, MessageCircle, Upload } from 'lucide-react';
 import { Card, PageHeader, MiniKpi, Tag } from '../ui';
 
 const customers = [
@@ -17,15 +18,41 @@ const followUps = [
 ];
 
 const CRM = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      alert(`Simulando upload da planilha: ${file.name}\nEm breve, esse arquivo irá alimentar o nosso banco de dados automaticamente!`);
+      // Reset input para permitir selecionar o mesmo arquivo novamente se necessário
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="CRM & Pós-Venda"
         subtitle="Relacionamento e reativação de clientes, com follow-up automático."
         action={
-          <button className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
-            <Users size={16} /> Novo Cliente
-          </button>
+          <div className="flex items-center gap-3">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+              onChange={handleFileUpload} 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors"
+            >
+              <Upload size={16} /> Importar Planilha
+            </button>
+            <button className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
+              <Users size={16} /> Novo Cliente
+            </button>
+          </div>
         }
       />
 
